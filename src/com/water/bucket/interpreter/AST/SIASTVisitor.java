@@ -99,6 +99,9 @@ public class SIASTVisitor implements ASTVisitor {
 
     @Override
     public Object visit(WhileLoopStatement whileLoopStatement) {
+        while((boolean) evaluate(whileLoopStatement.getCondition())){
+            evaluate(whileLoopStatement.getStatementGroup());
+        }
         return null;
     }
 

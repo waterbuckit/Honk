@@ -8,9 +8,16 @@ public class WhileLoopStatement extends Statement {
     private final CompoundStatement statementGroup;
 
     public WhileLoopStatement(Expression condition, CompoundStatement statementGroup) {
-        super();
         this.condition = condition;
         this.statementGroup = statementGroup;
+    }
+
+    public Expression getCondition() {
+        return condition;
+    }
+
+    public CompoundStatement getStatementGroup() {
+        return statementGroup;
     }
 
     @Override

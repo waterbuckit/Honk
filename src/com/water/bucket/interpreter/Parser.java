@@ -112,6 +112,7 @@ public class Parser {
             this.currentLexeme = originalLexeme;
         }
 
+        // while loops
         if(matchLexemeTypesOrdered(new LexemeType[]{LexemeType.WHILE, LexemeType.LEFT_PAREN}, originalLexeme)){
             Expression condition = matchExpression();
                         if(matchLexemeTypesOrdered(new LexemeType[]{LexemeType.RIGHT_PAREN, LexemeType.LEFT_BRACE},originalLexeme)){
