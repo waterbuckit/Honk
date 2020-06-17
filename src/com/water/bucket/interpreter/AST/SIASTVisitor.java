@@ -26,8 +26,10 @@ public class SIASTVisitor implements ASTVisitor {
     @Override
     public Object visit(SelectionStatement selectionStatement) {
         Object expression = evaluate(selectionStatement.getExpression());
-        if((boolean) expression){
+        if((boolean) expression) {
             evaluate(selectionStatement.getStatementGroup());
+        } else if(selectionStatement.getElseIf() != null){
+            evaluate(selectionStatement.getElseIf());
         }
         return null;
     }

@@ -7,12 +7,18 @@ public class SelectionStatement extends Statement{
 
     private final Expression expression;
     private final CompoundStatement statementGroup;
+    private final Statement elseIf;
 
-    public SelectionStatement(Expression expression, CompoundStatement statementGroup) {
+    public SelectionStatement(Expression expression, CompoundStatement statementGroup,
+                              Statement elseIf) {
         this.expression = expression;
         this.statementGroup = statementGroup;
+        this.elseIf = elseIf;
     }
 
+    public Statement getElseIf() {
+        return elseIf;
+    }
     public Expression getExpression() {
         return expression;
     }
@@ -28,6 +34,7 @@ public class SelectionStatement extends Statement{
 
     @Override
     public String toString() {
-        return "SelectionStatement(" + this.expression + ", " + statementGroup.toString()+")";
+        return elseIf == null ? "SelectionStatement(" + this.expression + ", " + statementGroup.toString()+")" :
+             "SelectionStatement(" + this.expression + ", " + statementGroup.toString()+", " + elseIf.toString()+")";
     }
 }

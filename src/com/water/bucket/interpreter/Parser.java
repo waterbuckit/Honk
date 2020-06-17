@@ -67,7 +67,7 @@ public class Parser {
             if(this.matchLexemeTypesOrdered(new LexemeType[]{LexemeType.RIGHT_PAREN, LexemeType.LEFT_BRACE}, originalLexeme)){
                 CompoundStatement statementGroup = this.matchStatements();
                 if(this.matchOnLexemeType(new LexemeType[]{LexemeType.RIGHT_BRACE})){
-                    return new SelectionStatement(expression, statementGroup);
+                    return new SelectionStatement(expression, statementGroup, matchElseIf(currentLexeme));
                 }
                 this.currentLexeme = originalLexeme;
             }
@@ -123,7 +123,26 @@ public class Parser {
             }
 
         }
+        return null;
+    }
 
+    private Statement matchElseIf(int originalLexeme) {
+        if(matchLexemeTypesOrdered(new LexemeType[]{LexemeType.ELSE, LexemeType.IF, LexemeType.LEFT_PAREN}, originalLexeme)) {
+            Expression expression = this.matchExpression();
+            if (this.matchLexemeTypesOrdered(new LexemeType[]{LexemeType.RIGHT_PAREN, LexemeType.LEFT_BRACE}, originalLexeme)) {
+                CompoundStatement statementGroup = this.matchStatements();
+                if (this.matchOnLexemeType(new LexemeType[]{LexemeType.RIGHT_BRACE})) {
+                    return new SelectionStatement(expression, statementGroup, this.matchElseIf(currentLexeme));
+                }
+                this.currentLexeme = originalLexeme;
+            }
+        }else if(matchLexemeTypesOrdered(new LexemeType[]{LexemeType.ELSE,LexemeType.LEFT_BRACE}, originalLexeme)) {
+                CompoundStatement statementGroup = this.matchStatements();
+                if (this.matchOnLexemeType(new LexemeType[]{LexemeType.RIGHT_BRACE})) {
+                    return statementGroup;
+                }
+                this.currentLexeme = originalLexeme;
+        }
         return null;
     }
 
