@@ -5,6 +5,7 @@ import com.water.bucket.interpreter.AST.AbstractSyntaxTree;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.SocketTimeoutException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -38,7 +39,12 @@ public class Interpreter {
         //}
 
         Parser parser = new Parser(lexemes);
-        System.out.println(parser.parse());
+        AbstractSyntaxTree abstractSyntaxTree = parser.parse();
+
+        System.out.println(abstractSyntaxTree);
+
+        Evaluator evaluator = new Evaluator(abstractSyntaxTree);
+        evaluator.evaluate();
     }
 
     public Interpreter() throws IOException {

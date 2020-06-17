@@ -1,11 +1,16 @@
 package com.water.bucket.interpreter.AST;
 
-import com.water.bucket.interpreter.AST.statements.StatementGroup;
+import com.water.bucket.interpreter.AST.statements.CompoundStatement;
 
 public class AbstractSyntaxTree {
-    private final StatementGroup rootNode;
-    public AbstractSyntaxTree(StatementGroup statementGroup) {
+
+    private final CompoundStatement rootNode;
+    public AbstractSyntaxTree(CompoundStatement statementGroup) {
         this.rootNode = statementGroup;
+    }
+
+    public CompoundStatement getRootNode() {
+        return rootNode;
     }
 
     @Override

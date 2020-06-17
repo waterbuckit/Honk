@@ -1,6 +1,6 @@
 package com.water.bucket.interpreter.AST.statements;
 
-import com.water.bucket.interpreter.AST.ASTVisitorInterface;
+import com.water.bucket.interpreter.AST.ASTVisitor;
 import com.water.bucket.interpreter.AST.expressions.Expression;
 
 public class PrintStatement extends Statement {
@@ -10,8 +10,12 @@ public class PrintStatement extends Statement {
         this.expression = expression;
     }
 
+    public Expression getExpression() {
+        return expression;
+    }
+
     @Override
-    public <T> T accept(ASTVisitorInterface<T> visitor) {
+    public <T> T accept(ASTVisitor<T> visitor) {
         return visitor.visit(this);
     }
 

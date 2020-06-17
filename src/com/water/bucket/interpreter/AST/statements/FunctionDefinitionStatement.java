@@ -1,6 +1,6 @@
 package com.water.bucket.interpreter.AST.statements;
 
-import com.water.bucket.interpreter.AST.ASTVisitorInterface;
+import com.water.bucket.interpreter.AST.ASTVisitor;
 import com.water.bucket.interpreter.Lexeme;
 
 import java.util.List;
@@ -8,16 +8,16 @@ import java.util.List;
 public class FunctionDefinitionStatement extends Statement {
     private final Lexeme functionIdentifier;
     private final List<Lexeme> functionParams;
-    private final StatementGroup statementGroup;
+    private final CompoundStatement statementGroup;
 
-    public FunctionDefinitionStatement(Lexeme functionIdentifier, List<Lexeme> functionParams, StatementGroup statementGroup) {
+    public FunctionDefinitionStatement(Lexeme functionIdentifier, List<Lexeme> functionParams, CompoundStatement statementGroup) {
         this.functionIdentifier = functionIdentifier;
         this.functionParams = functionParams;
         this.statementGroup = statementGroup;
     }
 
     @Override
-    public <T> T accept(ASTVisitorInterface<T> visitor) {
+    public <T> T accept(ASTVisitor<T> visitor) {
         return visitor.visit(this);
     }
 

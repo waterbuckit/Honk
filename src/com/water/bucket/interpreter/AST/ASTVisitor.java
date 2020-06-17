@@ -1,63 +1,21 @@
 package com.water.bucket.interpreter.AST;
 
-import com.water.bucket.interpreter.AST.expressions.BinaryExpression;
-import com.water.bucket.interpreter.AST.expressions.Identifier;
-import com.water.bucket.interpreter.AST.expressions.Literal;
-import com.water.bucket.interpreter.AST.expressions.UnaryExpression;
+
+import com.water.bucket.interpreter.AST.expressions.*;
 import com.water.bucket.interpreter.AST.statements.*;
 
-public class ASTVisitor implements ASTVisitorInterface {
+public interface ASTVisitor<T> {
+    public T visit(PrintStatement printStatement);
+    public T visit(FunctionDefinitionStatement functionDefinitionStatement);
+    public T visit(SelectionStatement selectionStatement);
+    public T visit(CompoundStatement statementGroup);
+    public T visit(AssignmentStatement assignmentStatement);
+    public T visit(UnaryExpression unaryExpression);
+    public T visit(BinaryExpression binaryExpression);
+    public T visit(Literal literal);
+    public T visit(Identifier identifier);
+    public T visit(FunctionCallStatement functionCallStatement);
+    public T visit(WhileLoopStatement whileLoopStatement);
 
-    @Override
-    public Object visit(PrintStatement printStatement) {
-        return null;
-    }
-
-    @Override
-    public Object visit(FunctionDefinitionStatement functionDefinitionStatement) {
-        return null;
-    }
-
-    @Override
-    public Object visit(SelectionStatement selectionStatement) {
-        return null;
-    }
-
-    @Override
-    public Object visit(StatementGroup statementGroup) {
-        return null;
-    }
-
-    @Override
-    public Object visit(AssignmentStatement asssignmentStatement) { return null;}
-
-    @Override
-    public String visit(UnaryExpression unaryExpression) {
-        return null;
-    }
-
-    @Override
-    public String visit(BinaryExpression binaryExpression) {
-        return null;
-    }
-
-    @Override
-    public String visit(Literal literal) {
-        return null;
-    }
-
-    @Override
-    public Object visit(Identifier identifier) {
-        return null;
-    }
-
-    @Override
-    public Object visit(FunctionCallStatement functionCallStatement) {
-        return null;
-    }
-
-    @Override
-    public Object visit(WhileLoopStatement whileLoopStatement) {
-        return null;
-    }
+    public T visit(CompoundExpression groupedExpression);
 }

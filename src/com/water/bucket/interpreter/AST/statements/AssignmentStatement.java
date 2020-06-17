@@ -1,6 +1,6 @@
 package com.water.bucket.interpreter.AST.statements;
 
-import com.water.bucket.interpreter.AST.ASTVisitorInterface;
+import com.water.bucket.interpreter.AST.ASTVisitor;
 import com.water.bucket.interpreter.AST.expressions.Expression;
 import com.water.bucket.interpreter.Lexeme;
 
@@ -14,7 +14,7 @@ public class AssignmentStatement extends Statement {
     }
 
     @Override
-    public <T> T accept(ASTVisitorInterface<T> visitor) {
+    public <T> T accept(ASTVisitor<T> visitor) {
         return visitor.visit(this);
     }
 

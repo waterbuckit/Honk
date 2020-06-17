@@ -35,12 +35,18 @@ public class Parser {
         return new AbstractSyntaxTree(this.matchStatements());
     }
 
-    private StatementGroup matchStatements() {
+    private CompoundStatement matchStatements() {
         List<Statement> statements = new ArrayList<>();
         while(lexemes.get(currentLexeme).lexemeType != LexemeType.RIGHT_BRACE && existsNextLexeme()){
-            statements.add(this.matchStatement());
+            Statement statement = this.matchStatement();
+            if(statement == null){
+                System.err.println("Parsing error near: \""+ lexemes.get(currentLexeme).getLexeme() +
+                        "\" at line " +lexemes.get(currentLexeme).getLine());;
+                System.exit(1);
+            }
+            statements.add(statement);
         }
-        return new StatementGroup(statements);
+        return new CompoundStatement(statements);
     }
 
     private Statement matchStatement() {
@@ -59,7 +65,7 @@ public class Parser {
         if(matchLexemeTypesOrdered(new LexemeType[]{LexemeType.IF, LexemeType.LEFT_PAREN}, originalLexeme)){
             Expression expression = this.matchExpression();
             if(this.matchLexemeTypesOrdered(new LexemeType[]{LexemeType.RIGHT_PAREN, LexemeType.LEFT_BRACE}, originalLexeme)){
-                StatementGroup statementGroup = this.matchStatements();
+                CompoundStatement statementGroup = this.matchStatements();
                 if(this.matchOnLexemeType(new LexemeType[]{LexemeType.RIGHT_BRACE})){
                     return new SelectionStatement(expression, statementGroup);
                 }
@@ -76,7 +82,7 @@ public class Parser {
                 functionParams.add(this.lexemes.get(currentLexeme-1));
             }
             if(matchLexemeTypesOrdered(new LexemeType[]{LexemeType.RIGHT_PAREN, LexemeType.LEFT_BRACE},originalLexeme)){
-                StatementGroup statementGroup = this.matchStatements();
+                CompoundStatement statementGroup = this.matchStatements();
                 if(this.matchOnLexemeType(new LexemeType[]{LexemeType.RIGHT_BRACE})){
                     return new FunctionDefinitionStatement(functionIdentifier, functionParams, statementGroup);
                 }
@@ -87,6 +93,7 @@ public class Parser {
         // print statement
         if(matchLexemeTypesOrdered(new LexemeType[]{LexemeType.PRINT, LexemeType.LEFT_PAREN}, originalLexeme)){
             Expression expression = this.matchExpression();
+
             if(matchLexemeTypesOrdered(new LexemeType[]{LexemeType.RIGHT_PAREN, LexemeType.SEMICOLON}, originalLexeme)){
                 return new PrintStatement(expression);
             }
@@ -108,7 +115,7 @@ public class Parser {
         if(matchLexemeTypesOrdered(new LexemeType[]{LexemeType.WHILE, LexemeType.LEFT_PAREN}, originalLexeme)){
             Expression condition = matchExpression();
                         if(matchLexemeTypesOrdered(new LexemeType[]{LexemeType.RIGHT_PAREN, LexemeType.LEFT_BRACE},originalLexeme)){
-                StatementGroup statementGroup = this.matchStatements();
+                CompoundStatement statementGroup = this.matchStatements();
                 if(this.matchOnLexemeType(new LexemeType[]{LexemeType.RIGHT_BRACE})){
                     return new WhileLoopStatement(condition, statementGroup);
                 }
@@ -117,7 +124,7 @@ public class Parser {
 
         }
 
-        return new StatementGroup(new ArrayList<>());
+        return null;
     }
 
     private boolean existsNextLexeme() {
@@ -156,11 +163,12 @@ public class Parser {
     private Expression matchEquality() {
         Expression leftSideComparison = this.matchComparison();
 
-        if(matchOnLexemeType(new LexemeType[]{LexemeType.NOT_EQUAL, LexemeType.EQUAL_EQUAL})){
+        while(matchOnLexemeType(new LexemeType[]{LexemeType.NOT_EQUAL, LexemeType.EQUAL_EQUAL})){
             Lexeme operator = this.lexemes.get(currentLexeme-1);
             Expression rightSideComparison = this.matchComparison();
             // we rewrite as the whole expression
-            leftSideComparison = new BinaryExpression(operator, leftSideComparison, rightSideComparison);
+            leftSideComparison = new CompoundExpression(
+                    new BinaryExpression(operator, leftSideComparison, rightSideComparison));
         }
 
         // because the right hand side may not need to be completed for the equality production rule
@@ -172,24 +180,24 @@ public class Parser {
 
         Expression leftSideAddition = this.matchAddition();
 
-        if(matchOnLexemeType(new LexemeType[]{LexemeType.GREATER, LexemeType.GREATER_EQUAL, LexemeType.LESS,
+        while(matchOnLexemeType(new LexemeType[]{LexemeType.GREATER, LexemeType.GREATER_EQUAL, LexemeType.LESS,
                 LexemeType.LESS_EQUAL})){
             Lexeme operator = this.lexemes.get(currentLexeme-1);
             Expression rightSideAddition = this.matchAddition();
-            leftSideAddition = new BinaryExpression(operator, leftSideAddition, rightSideAddition);
+            leftSideAddition = new CompoundExpression(new BinaryExpression(operator, leftSideAddition, rightSideAddition));
         }
 
         return leftSideAddition;
     }
 
     private Expression matchAddition() {
-
         Expression leftSideMultiplication = this.matchMultiplication();
 
-        if(matchOnLexemeType(new LexemeType[]{LexemeType.MINUS, LexemeType.PLUS})){
+        while(matchOnLexemeType(new LexemeType[]{LexemeType.MINUS, LexemeType.PLUS})){
             Lexeme operator = this.lexemes.get(currentLexeme-1);
             Expression rightSideMultiplication = this.matchMultiplication();
-            leftSideMultiplication = new BinaryExpression(operator, leftSideMultiplication, rightSideMultiplication);
+            leftSideMultiplication = new CompoundExpression(
+                    new BinaryExpression(operator, leftSideMultiplication, rightSideMultiplication));
         }
 
         return leftSideMultiplication;
@@ -199,10 +207,10 @@ public class Parser {
 
         Expression leftSideUnary = this.matchUnary();
 
-        if(matchOnLexemeType(new LexemeType[]{LexemeType.STAR, LexemeType.SLASH})){
+        while(matchOnLexemeType(new LexemeType[]{LexemeType.STAR, LexemeType.SLASH, LexemeType.PERCENT})){
             Lexeme operator = this.lexemes.get(currentLexeme-1);
             Expression rightSideUnary = this.matchUnary();
-            leftSideUnary = new BinaryExpression(operator, leftSideUnary, rightSideUnary);
+            leftSideUnary = new CompoundExpression(new BinaryExpression(operator, leftSideUnary, rightSideUnary));
         }
 
         return leftSideUnary;
@@ -228,7 +236,7 @@ public class Parser {
         }else if(matchOnLexemeType(new LexemeType[]{LexemeType.LEFT_PAREN})){
             Expression expression = this.matchExpression();
             if(matchOnLexemeType(new LexemeType[]{LexemeType.RIGHT_PAREN})){
-                return expression;
+                return new CompoundExpression(expression);
             }
         }
         System.err.println("Error in parsing: " + lexemes.get(currentLexeme).toString());

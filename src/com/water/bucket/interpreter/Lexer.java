@@ -126,6 +126,7 @@ public class Lexer {
             case '{': addLexeme(LexemeType.LEFT_BRACE); break;
             case '}': addLexeme(LexemeType.RIGHT_BRACE); break;
             case ',': addLexeme(LexemeType.COMMA); break;
+            case '%': addLexeme(LexemeType.PERCENT); break;
             case '.': addLexeme(LexemeType.DOT); break;
             case '-': addLexeme(LexemeType.MINUS); break;
             case '+': addLexeme(LexemeType.PLUS); break;
