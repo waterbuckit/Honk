@@ -1,16 +1,16 @@
-package com.water.bucket.interpreter.AST.statements;
+package com.water.bucket.interpreter.AST.expressions;
 
 import com.water.bucket.interpreter.AST.ASTVisitor;
-import com.water.bucket.interpreter.AST.expressions.Expression;
+import com.water.bucket.interpreter.AST.statements.Statement;
 import com.water.bucket.interpreter.Lexeme;
 
 import java.util.List;
 
-public class FunctionCallStatement extends Statement {
+public class FunctionCallExpression implements Expression {
     private final Lexeme identifier;
     private final List<Expression> arguments;
 
-    public FunctionCallStatement(Lexeme identifier, List<Expression> arguments) {
+    public FunctionCallExpression(Lexeme identifier, List<Expression> arguments) {
         this.identifier = identifier;
         this.arguments = arguments;
     }
@@ -30,7 +30,7 @@ public class FunctionCallStatement extends Statement {
 
     @Override
     public String toString() {
-        return "FunctionCallStatement(" + identifier +
+        return "FunctionCallExpression(" + identifier +
                 ", " + arguments +
                 ')';
     }

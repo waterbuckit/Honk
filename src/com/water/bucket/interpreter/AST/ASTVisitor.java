@@ -18,4 +18,10 @@ public interface ASTVisitor<T> {
     public T visit(WhileLoopStatement whileLoopStatement);
 
     public T visit(CompoundExpression groupedExpression);
+
+    public T visit(ReAssignmentStatement reAssignmentStatement);
+
+    public T visit(ReturnStatement returnStatement);
+
+    public T visit(FunctionCallExpression functionCallExpression);
 }

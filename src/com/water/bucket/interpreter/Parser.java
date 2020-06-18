@@ -61,6 +61,15 @@ public class Parser {
             this.currentLexeme = originalLexeme;
         }
 
+        // reassignment statement
+        if(matchLexemeTypesOrdered(new LexemeType[]{LexemeType.IDENTIFIER, LexemeType.EQUAL}, originalLexeme)){
+            Expression expression = this.matchExpression();
+            if(this.matchOnLexemeType(new LexemeType[]{LexemeType.SEMICOLON})){
+                return new ReAssignmentStatement(this.lexemes.get(originalLexeme), expression);
+            }
+            this.currentLexeme = originalLexeme;
+        }
+
         // if statement
         if(matchLexemeTypesOrdered(new LexemeType[]{LexemeType.IF, LexemeType.LEFT_PAREN}, originalLexeme)){
             Expression expression = this.matchExpression();
@@ -80,6 +89,9 @@ public class Parser {
             List<Lexeme> functionParams = new ArrayList<>();
             while(matchOnLexemeType(new LexemeType[]{LexemeType.IDENTIFIER})){
                 functionParams.add(this.lexemes.get(currentLexeme-1));
+                if(!matchOnLexemeType(new LexemeType[]{LexemeType.COMMA})){
+                    break;
+                }
             }
             if(matchLexemeTypesOrdered(new LexemeType[]{LexemeType.RIGHT_PAREN, LexemeType.LEFT_BRACE},originalLexeme)){
                 CompoundStatement statementGroup = this.matchStatements();
@@ -103,8 +115,12 @@ public class Parser {
         if(matchLexemeTypesOrdered(new LexemeType[]{LexemeType.IDENTIFIER,LexemeType.LEFT_PAREN}, originalLexeme)){
             Lexeme identifier = this.lexemes.get(originalLexeme);
             List<Expression> arguments = new ArrayList<>();
-            while(matchOnLexemeType(new LexemeType[]{LexemeType.RIGHT_PAREN})){
+            while(!matchOnLexemeType(new LexemeType[]{LexemeType.RIGHT_PAREN})){
                 arguments.add(matchExpression());
+                if(!matchOnLexemeType(new LexemeType[]{LexemeType.COMMA})){
+                    currentLexeme++;
+                    break;
+                }
             }
             if(matchOnLexemeType(new LexemeType[]{LexemeType.SEMICOLON})){
                 return new FunctionCallStatement(identifier, arguments);
@@ -123,6 +139,13 @@ public class Parser {
                 this.currentLexeme = originalLexeme;
             }
 
+        }
+        // return statement
+        if(matchOnLexemeType(new LexemeType[]{LexemeType.RETURN})){
+            Expression toReturn = matchExpression();
+            if(matchOnLexemeType(new LexemeType[]{LexemeType.SEMICOLON})){
+                return new ReturnStatement(toReturn);
+            }
         }
         return null;
     }
@@ -154,6 +177,24 @@ public class Parser {
     private Expression matchExpression(){
         return this.matchEquality();
     }
+
+    private Expression matchFunctionCall(int originalLexeme) {
+        if(matchLexemeTypesOrdered(new LexemeType[]{LexemeType.IDENTIFIER,LexemeType.LEFT_PAREN}, originalLexeme)){
+            Lexeme identifier = this.lexemes.get(originalLexeme);
+            List<Expression> arguments = new ArrayList<>();
+            while(!matchOnLexemeType(new LexemeType[]{LexemeType.RIGHT_PAREN})){
+                arguments.add(matchExpression());
+                if(!matchOnLexemeType(new LexemeType[]{LexemeType.COMMA})){
+                    currentLexeme++;
+                    break;
+                }
+            }
+            return new FunctionCallExpression(identifier, arguments);
+        }
+        this.currentLexeme = originalLexeme;
+        return null;
+    }
+
     private boolean matchLexemeTypesOrdered(LexemeType[] lexemeTypes, int originalLexeme){
         for(LexemeType lexemeType : lexemeTypes) {
             if (lexemeType == this.lexemes.get(currentLexeme).lexemeType){
@@ -247,10 +288,12 @@ public class Parser {
     }
 
     private Expression matchPrimary() {
-
+        Expression expr = null;
         if(matchOnLexemeType(new LexemeType[]{LexemeType.NUMBER, LexemeType.STRING, LexemeType.FALSE,
             LexemeType.TRUE, LexemeType.NIL,})) {
             return new Literal(this.lexemes.get(currentLexeme - 1));
+        }else if((expr = matchFunctionCall(this.currentLexeme)) != null) {
+            return expr;
         }else if(matchOnLexemeType(new LexemeType[]{LexemeType.IDENTIFIER})){
             return new Identifier(this.lexemes.get(currentLexeme - 1));
         }else if(matchOnLexemeType(new LexemeType[]{LexemeType.LEFT_PAREN})){

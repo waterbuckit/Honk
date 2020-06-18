@@ -16,6 +16,18 @@ public class FunctionDefinitionStatement extends Statement {
         this.statementGroup = statementGroup;
     }
 
+    public Lexeme getFunctionIdentifier() {
+        return functionIdentifier;
+    }
+
+    public List<Lexeme> getFunctionParams() {
+        return functionParams;
+    }
+
+    public CompoundStatement getStatementGroup() {
+        return statementGroup;
+    }
+
     @Override
     public <T> T accept(ASTVisitor<T> visitor) {
         return visitor.visit(this);

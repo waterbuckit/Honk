@@ -10,6 +10,14 @@ public class Identifier implements Expression {
         this.lexeme = lexeme;
     }
 
+    public Lexeme getLexeme() {
+        return lexeme;
+    }
+
+    public String getIdentifier() {
+        return lexeme.getLexeme();
+    }
+
     @Override
     public <T> T accept(ASTVisitor<T> visitor) {
         return visitor.visit(this);
