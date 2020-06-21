@@ -209,10 +209,14 @@ public class SIASTVisitor implements ASTVisitor {
         Object variable = null;
         if(((variable = this.callStack.peekFirst().getVariable(arrayIndex.getOriginalLexeme().getLexeme())) != null
         || (variable = this.callStack.peekLast().getVariable(arrayIndex.getOriginalLexeme().getLexeme()))!= null)
-                && variable instanceof ArrayList) {
+                && (variable instanceof ArrayList || variable instanceof String)) {
             for(Expression expression : arrayIndex.getIndexPath()){
-                fetchedElement = ((ArrayList) variable)
-                        .get(Double.valueOf((double)evaluate(expression)).intValue());
+                if(variable instanceof String){
+                    return ((String) variable).charAt(Double.valueOf((double)evaluate(expression)).intValue());
+                }else {
+                    fetchedElement = ((ArrayList) variable)
+                            .get(Double.valueOf((double)evaluate(expression)).intValue());
+                }
                 variable = fetchedElement;
             }
 
