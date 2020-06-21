@@ -14,7 +14,6 @@ public interface ASTVisitor<T> {
     public T visit(BinaryExpression binaryExpression);
     public T visit(Literal literal);
     public T visit(Identifier identifier);
-    public T visit(FunctionCallStatement functionCallStatement);
     public T visit(WhileLoopStatement whileLoopStatement);
 
     public T visit(CompoundExpression groupedExpression);

@@ -112,21 +112,21 @@ public class Parser {
         }
 
         // function call
-        if(matchLexemeTypesOrdered(new LexemeType[]{LexemeType.IDENTIFIER,LexemeType.LEFT_PAREN}, originalLexeme)){
-            Lexeme identifier = this.lexemes.get(originalLexeme);
-            List<Expression> arguments = new ArrayList<>();
-            while(!matchOnLexemeType(new LexemeType[]{LexemeType.RIGHT_PAREN})){
-                arguments.add(matchExpression());
-                if(!matchOnLexemeType(new LexemeType[]{LexemeType.COMMA})){
-                    currentLexeme++;
-                    break;
-                }
-            }
-            if(matchOnLexemeType(new LexemeType[]{LexemeType.SEMICOLON})){
-                return new FunctionCallStatement(identifier, arguments);
-            }
-            this.currentLexeme = originalLexeme;
-        }
+        //if(matchLexemeTypesOrdered(new LexemeType[]{LexemeType.IDENTIFIER,LexemeType.LEFT_PAREN}, originalLexeme)){
+        //    Lexeme identifier = this.lexemes.get(originalLexeme);
+        //    List<Expression> arguments = new ArrayList<>();
+        //    while(!matchOnLexemeType(new LexemeType[]{LexemeType.RIGHT_PAREN})){
+        //        arguments.add(matchExpression());
+        //        if(!matchOnLexemeType(new LexemeType[]{LexemeType.COMMA})){
+        //            currentLexeme++;
+        //            break;
+        //        }
+        //    }
+        //    if(matchOnLexemeType(new LexemeType[]{LexemeType.SEMICOLON})){
+        //        return new FunctionCallStatement(identifier, arguments);
+        //    }
+        //    this.currentLexeme = originalLexeme;
+        //}
 
         // while loops
         if(matchLexemeTypesOrdered(new LexemeType[]{LexemeType.WHILE, LexemeType.LEFT_PAREN}, originalLexeme)){
@@ -346,7 +346,7 @@ public class Parser {
                     indexPath.add(index);
                 }
             }
-            return new ArrayIndex(identifier, indexPath);
+            return new ArrayIndex(new Identifier(identifier), indexPath);
         }
         this.currentLexeme = originalLexeme;
         return null;

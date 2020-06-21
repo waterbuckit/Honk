@@ -3,10 +3,7 @@ package com.water.bucket.interpreter.AST;
 import com.water.bucket.interpreter.AST.expressions.*;
 import com.water.bucket.interpreter.AST.statements.*;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.HashMap;
+import java.util.*;
 
 public class SIASTVisitor implements ASTVisitor {
 
@@ -14,7 +11,6 @@ public class SIASTVisitor implements ASTVisitor {
 
     public SIASTVisitor(){
         this.callStack = new ArrayDeque<>();
-        this.callStack.push(new ScopeInstance());
     }
 
     private Object evaluate(Statement statement) {
@@ -49,10 +45,12 @@ public class SIASTVisitor implements ASTVisitor {
 
     @Override
     public Object visit(CompoundStatement statementGroup) {
+        this.callStack.push(new ScopeInstance(ScopeType.BLOCK_SCOPE));
         for(Statement statement : statementGroup.getStatements()){
             statement.accept(this);
             if(this.callStack.peekFirst().isReturned()){ return this.callStack.peekFirst().getReturnVal(); };
         }
+        this.callStack.pop();
         return null;
     }
 
@@ -107,35 +105,23 @@ public class SIASTVisitor implements ASTVisitor {
 
     @Override
     public Object visit(Identifier identifier) {
-        Object variable;
-        if((variable = this.callStack.peekFirst().getVariable(identifier.getIdentifier())) != null
-        || (variable = this.callStack.peekLast().getVariable(identifier.getIdentifier()))!= null) {
+        Object variable = null;
+
+        Iterator<ScopeInstance> descending = this.callStack.iterator();
+
+        while (descending.hasNext()) {
+            ScopeInstance current = descending.next();
+            variable = current.getVariable(identifier.getIdentifier());
+
+            if (variable != null || current.getScopeType() == ScopeType.FUNCTION_SCOPE) {
+                break;
+            }
+        }
+        if(variable != null || (variable = this.callStack.peekLast().getVariable(identifier.getIdentifier()))!= null) {
             return variable;
         }else{
             System.err.println("Variable: " + identifier + " does not exist");
             System.exit(1);
-        }
-        return null;
-    }
-
-    @Override
-    public Object visit(FunctionCallStatement functionCallStatement) {
-        callStack.push(new ScopeInstance());
-        FunctionDefinitionStatement function;
-        if((function = this.callStack.peekLast().getFunction(functionCallStatement.getIdentifier().getLexeme())) != null
-            || (function = this.callStack.peekFirst().getFunction(functionCallStatement.getIdentifier().getLexeme()))!= null) {
-
-            if(function.getFunctionParams().size() != functionCallStatement.getArguments().size()){
-                System.err.println("Mismatch in number of supplied parameters to function: " +
-                        functionCallStatement.getIdentifier().getLexeme());
-            }
-
-            for(int i = 0; i < functionCallStatement.getArguments().size(); i++){
-                callStack.peek().addVariable(function.getFunctionParams().get(i).getLexeme(),
-                        evaluate(functionCallStatement.getArguments().get(i)));
-            }
-            evaluate(function.getStatementGroup());
-            callStack.pop();
         }
         return null;
     }
@@ -155,21 +141,36 @@ public class SIASTVisitor implements ASTVisitor {
 
     @Override
     public Object visit(ReAssignmentStatement reAssignmentStatement) {
-        Object variable;
-        if((variable = this.callStack.peekFirst().getVariable(reAssignmentStatement.getLexeme().getLexeme())) != null
-        || (variable = this.callStack.peekLast().getVariable(reAssignmentStatement.getLexeme().getLexeme()))!= null) {
-            variable = evaluate(reAssignmentStatement.getExpression());
-            this.callStack.peekFirst().addVariable(reAssignmentStatement.getLexeme().getLexeme(), variable);
-            return variable;
-        }else{
-            System.err.println("Variable: " + reAssignmentStatement.getLexeme().getLexeme() + " does not exist");
-            System.exit(1);
+        Object variable = null;
+        Iterator<ScopeInstance> descending = this.callStack.iterator();
+        while (descending.hasNext()) {
+            ScopeInstance current = descending.next();
+            variable = current.getVariable(reAssignmentStatement.getLexeme().getLexeme());
+            if (variable != null) {
+                variable = evaluate(reAssignmentStatement.getExpression());
+                current.addVariable(reAssignmentStatement.getLexeme().getLexeme(), variable);
+                return variable;
+            }
+            if (current.getScopeType() == ScopeType.FUNCTION_SCOPE) {
+                break;
+            }
         }
+        if(this.callStack.peekLast()
+                .getVariable(reAssignmentStatement.getLexeme().getLexeme())!= null) {
+            variable = evaluate(reAssignmentStatement.getExpression());
+            this.callStack.peekLast().addVariable(reAssignmentStatement.getLexeme().getLexeme(), variable);
+            return variable;
+        }
+        System.err.println("Variable: " + reAssignmentStatement.getLexeme().getLexeme() + " does not exist");
+        System.exit(1);
         return null;
     }
 
     @Override
     public Object visit(ReturnStatement returnStatement) {
+        while(callStack.peekFirst().getScopeType() != ScopeType.FUNCTION_SCOPE){
+            callStack.pop();
+        }
         this.callStack.peekFirst().ret(evaluate(returnStatement.getToReturn()));
         return null;
     }
@@ -192,7 +193,7 @@ public class SIASTVisitor implements ASTVisitor {
                 variables.put(function.getFunctionParams().get(i).getLexeme(),
                         evaluate(functionCallExpression.getArguments().get(i)));
             }
-            callStack.push(new ScopeInstance(variables));
+            callStack.push(new ScopeInstance(variables, ScopeType.FUNCTION_SCOPE));
             returnVal = evaluate(function.getStatementGroup());
             callStack.pop();
         }else {
@@ -207,8 +208,7 @@ public class SIASTVisitor implements ASTVisitor {
     public Object visit(ArrayIndex arrayIndex) {
         Object fetchedElement = null;
         Object variable = null;
-        if(((variable = this.callStack.peekFirst().getVariable(arrayIndex.getOriginalLexeme().getLexeme())) != null
-        || (variable = this.callStack.peekLast().getVariable(arrayIndex.getOriginalLexeme().getLexeme()))!= null)
+        if((variable = this.visit(arrayIndex.getIdentifier())) != null
                 && (variable instanceof ArrayList || variable instanceof String)) {
             for(Expression expression : arrayIndex.getIndexPath()){
                 if(variable instanceof String){

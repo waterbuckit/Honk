@@ -9,14 +9,25 @@ public class ScopeInstance {
     private final HashMap<String, FunctionDefinitionStatement> functions;
     private boolean isReturned;
     private Object returnVal;
+    private final ScopeType scopeType;
 
-    public ScopeInstance() {
-        isReturned = false;
-        variables = new HashMap<>();
-        functions = new HashMap<>();
+    public ScopeInstance(ScopeType scopeType) {
+        this.scopeType = scopeType;
+        this.isReturned = false;
+        this.variables = new HashMap<>();
+        this.functions = new HashMap<>();
     }
 
-    public ScopeInstance(HashMap<String, Object> variables) {
+
+    //public ScopeInstance() {
+    //    isReturned = false;
+    //    variables = new HashMap<>();
+    //    functions = new HashMap<>();
+    //}
+
+    public ScopeInstance(HashMap<String, Object> variables, ScopeType scopeType) {
+        this.scopeType = scopeType;
+        this.isReturned = false;
         this.variables = variables;
         this.functions = new HashMap<>();
     }
@@ -50,6 +61,10 @@ public class ScopeInstance {
         this.returnVal = evaluated;
     }
 
+    public HashMap<String, Object> getVariables() {
+        return variables;
+    }
+
     @Override
     public String toString() {
         return "ScopeInstance{" +
@@ -57,6 +72,11 @@ public class ScopeInstance {
                 ", functions=" + functions +
                 ", isReturned=" + isReturned +
                 ", returnVal=" + returnVal +
+                ", scopeType=" + scopeType +
                 '}';
+    }
+
+    public ScopeType getScopeType() {
+        return scopeType;
     }
 }
