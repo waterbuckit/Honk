@@ -147,6 +147,11 @@ public class Parser {
                 return new ReturnStatement(toReturn);
             }
         }
+
+        Expression expression = null;
+        if((expression = matchExpression())!= null && matchOnLexemeType(new LexemeType[]{LexemeType.SEMICOLON})){
+            return new ExpressionStatement(expression);
+        }
         return null;
     }
 
@@ -294,6 +299,10 @@ public class Parser {
             return new Literal(this.lexemes.get(currentLexeme - 1));
         }else if((expr = matchFunctionCall(this.currentLexeme)) != null) {
             return expr;
+        }else if((expr = matchArrayIndex(this.currentLexeme)) != null) {
+            return expr;
+        }else if((expr = matchArrayDefinition(this.currentLexeme)) != null){
+            return expr;
         }else if(matchOnLexemeType(new LexemeType[]{LexemeType.IDENTIFIER})){
             return new Identifier(this.lexemes.get(currentLexeme - 1));
         }else if(matchOnLexemeType(new LexemeType[]{LexemeType.LEFT_PAREN})){
@@ -304,6 +313,42 @@ public class Parser {
         }
         System.err.println("Error in parsing: " + lexemes.get(currentLexeme).toString());
         System.exit(1);
+        return null;
+    }
+
+    private Expression matchArrayDefinition(int originalLexeme) {
+        if(matchOnLexemeType(new LexemeType[]{LexemeType.LEFT_SQUARE})){
+            List<Expression> elements = new ArrayList<>();
+            while(!matchOnLexemeType(new LexemeType[]{LexemeType.RIGHT_SQUARE})){
+                elements.add(matchExpression());
+                if(!matchOnLexemeType(new LexemeType[]{LexemeType.COMMA})){
+                    currentLexeme++;
+                    break;
+                }
+            }
+            return new ArrayDefinition(elements);
+        }
+        this.currentLexeme = originalLexeme;
+        return null;
+    }
+
+    private Expression matchArrayIndex(int originalLexeme) {
+        if(matchLexemeTypesOrdered(new LexemeType[]{LexemeType.IDENTIFIER, LexemeType.LEFT_SQUARE}, originalLexeme)){
+            Lexeme identifier = this.lexemes.get(originalLexeme);
+            ArrayList<Expression> indexPath = new ArrayList<>();
+            Expression index = this.matchExpression();
+            if(matchOnLexemeType(new LexemeType[]{LexemeType.RIGHT_SQUARE})){
+                indexPath.add(index);
+            }
+            while(matchOnLexemeType(new LexemeType[]{LexemeType.LEFT_SQUARE})){
+                index = this.matchExpression();
+                if(matchOnLexemeType(new LexemeType[]{LexemeType.RIGHT_SQUARE})){
+                    indexPath.add(index);
+                }
+            }
+            return new ArrayIndex(identifier, indexPath);
+        }
+        this.currentLexeme = originalLexeme;
         return null;
     }
 

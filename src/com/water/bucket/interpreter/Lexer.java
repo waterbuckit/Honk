@@ -123,6 +123,8 @@ public class Lexer {
         switch (c) {
             case '(': addLexeme(LexemeType.LEFT_PAREN); break;
             case ')': addLexeme(LexemeType.RIGHT_PAREN); break;
+            case '[': addLexeme(LexemeType.LEFT_SQUARE); break;
+            case ']': addLexeme(LexemeType.RIGHT_SQUARE); break;
             case '{': addLexeme(LexemeType.LEFT_BRACE); break;
             case '}': addLexeme(LexemeType.RIGHT_BRACE); break;
             case ',': addLexeme(LexemeType.COMMA); break;

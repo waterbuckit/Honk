@@ -4,6 +4,7 @@ import com.water.bucket.interpreter.AST.expressions.*;
 import com.water.bucket.interpreter.AST.statements.*;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
 
@@ -200,5 +201,36 @@ public class SIASTVisitor implements ASTVisitor {
         }
         return returnVal;
 
+    }
+
+    @Override
+    public Object visit(ArrayIndex arrayIndex) {
+        Object fetchedElement = null;
+        Object variable = null;
+        if(((variable = this.callStack.peekFirst().getVariable(arrayIndex.getOriginalLexeme().getLexeme())) != null
+        || (variable = this.callStack.peekLast().getVariable(arrayIndex.getOriginalLexeme().getLexeme()))!= null)
+                && variable instanceof ArrayList) {
+            for(Expression expression : arrayIndex.getIndexPath()){
+                fetchedElement = ((ArrayList) variable)
+                        .get(Double.valueOf((double)evaluate(expression)).intValue());
+                variable = fetchedElement;
+            }
+
+        }
+        return fetchedElement;
+    }
+
+    @Override
+    public Object visit(ExpressionStatement expressionStatement) {
+        return evaluate(expressionStatement.getExpression());
+    }
+
+    @Override
+    public Object visit(ArrayDefinition arrayDeclaration) {
+        ArrayList<Object> elements = new ArrayList<>();
+        for(Expression expr : arrayDeclaration.getElements()){
+            elements.add(evaluate(expr));
+        }
+        return elements;
     }
 }

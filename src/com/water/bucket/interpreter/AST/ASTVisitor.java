@@ -24,4 +24,10 @@ public interface ASTVisitor<T> {
     public T visit(ReturnStatement returnStatement);
 
     public T visit(FunctionCallExpression functionCallExpression);
+
+    public T visit(ArrayIndex arrayIndex);
+
+    public T visit(ExpressionStatement expressionStatement);
+
+    T visit(ArrayDefinition emptyArrayDeclaration);
 }
