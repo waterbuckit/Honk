@@ -307,7 +307,7 @@ public class Parser {
         }else if(matchOnLexemeType(new LexemeType[]{LexemeType.LEFT_PAREN})){
             Expression expression = this.matchExpression();
             if(matchOnLexemeType(new LexemeType[]{LexemeType.RIGHT_PAREN})){
-                return new CompoundExpression(expression);
+                expr = new CompoundExpression(expression);
             }
         }
         ArrayList<Expression> indexPath = null;
