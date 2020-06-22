@@ -294,22 +294,28 @@ public class Parser {
 
     private Expression matchPrimary() {
         Expression expr = null;
-        if(matchOnLexemeType(new LexemeType[]{LexemeType.NUMBER, LexemeType.STRING, LexemeType.FALSE,
-            LexemeType.TRUE, LexemeType.NIL,})) {
+        if(matchOnLexemeType(new LexemeType[]{LexemeType.NUMBER, LexemeType.FALSE,
+            LexemeType.TRUE, LexemeType.NIL})) {
             return new Literal(this.lexemes.get(currentLexeme - 1));
+        }else if(matchOnLexemeType(new LexemeType[]{LexemeType.STRING})){
+            expr = new Literal(this.lexemes.get(currentLexeme -1));
         }else if((expr = matchFunctionCall(this.currentLexeme)) != null) {
-            return expr;
-        }else if((expr = matchArrayIndex(this.currentLexeme)) != null) {
-            return expr;
         }else if((expr = matchArrayDefinition(this.currentLexeme)) != null){
             return expr;
         }else if(matchOnLexemeType(new LexemeType[]{LexemeType.IDENTIFIER})){
-            return new Identifier(this.lexemes.get(currentLexeme - 1));
+            expr = new Identifier(this.lexemes.get(currentLexeme - 1));
         }else if(matchOnLexemeType(new LexemeType[]{LexemeType.LEFT_PAREN})){
             Expression expression = this.matchExpression();
             if(matchOnLexemeType(new LexemeType[]{LexemeType.RIGHT_PAREN})){
                 return new CompoundExpression(expression);
             }
+        }
+        ArrayList<Expression> indexPath = null;
+        if(expr != null){
+            if((indexPath = matchArrayIndex(currentLexeme))!= null){
+                return new ArrayIndex(expr, indexPath);
+            }
+            return expr;
         }
         System.err.println("Error in parsing: " + lexemes.get(currentLexeme).toString());
         System.exit(1);
@@ -332,9 +338,9 @@ public class Parser {
         return null;
     }
 
-    private Expression matchArrayIndex(int originalLexeme) {
-        if(matchLexemeTypesOrdered(new LexemeType[]{LexemeType.IDENTIFIER, LexemeType.LEFT_SQUARE}, originalLexeme)){
-            Lexeme identifier = this.lexemes.get(originalLexeme);
+    private ArrayList<Expression> matchArrayIndex(int originalLexeme) {
+        if(matchLexemeTypesOrdered(new LexemeType[]{LexemeType.LEFT_SQUARE}, originalLexeme)){
+            //Lexeme identifier = this.lexemes.get(originalLexeme);
             ArrayList<Expression> indexPath = new ArrayList<>();
             Expression index = this.matchExpression();
             if(matchOnLexemeType(new LexemeType[]{LexemeType.RIGHT_SQUARE})){
@@ -346,7 +352,7 @@ public class Parser {
                     indexPath.add(index);
                 }
             }
-            return new ArrayIndex(new Identifier(identifier), indexPath);
+            return indexPath;
         }
         this.currentLexeme = originalLexeme;
         return null;

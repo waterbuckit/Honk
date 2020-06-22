@@ -208,7 +208,7 @@ public class SIASTVisitor implements ASTVisitor {
     public Object visit(ArrayIndex arrayIndex) {
         Object fetchedElement = null;
         Object variable = null;
-        if((variable = this.visit(arrayIndex.getIdentifier())) != null
+        if((variable = evaluate(arrayIndex.getSource())) != null
                 && (variable instanceof ArrayList || variable instanceof String)) {
             for(Expression expression : arrayIndex.getIndexPath()){
                 if(variable instanceof String){

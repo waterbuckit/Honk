@@ -6,20 +6,29 @@ import com.water.bucket.interpreter.Lexeme;
 import java.util.ArrayList;
 
 public class ArrayIndex implements Expression {
-    private Identifier originalLexeme;
+    private Expression source;
     private final ArrayList<Expression> index;
 
-    public ArrayIndex(Identifier originalLexeme, ArrayList<Expression> index) {
-        this.originalLexeme = originalLexeme;
+    public ArrayIndex(Expression source, ArrayList<Expression> index) {
+        this.source = source;
         this.index = index;
     }
+
 
     public ArrayList<Expression> getIndexPath() {
         return index;
     }
 
-    public Identifier getIdentifier() {
-        return originalLexeme;
+    public Expression getSource() {
+        return source;
+    }
+
+    public void setSource(Expression source) {
+        this.source = source;
+    }
+
+    public ArrayList<Expression> getIndex() {
+        return index;
     }
 
     @Override
